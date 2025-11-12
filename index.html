@@ -1,32 +1,71 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <title>آزمایشگاه ریاضی</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h1>آزمایشگاه ریاضی - مجموعه‌ها</h1>
-    <div class="input-section">
-      <label for="setA">مجموعه A:</label>
-      <input type="text" id="setA" placeholder="مثال: 1,2,3" />
-    </div>
-    <div class="input-section">
-      <label for="setB">مجموعه B:</label>
-      <input type="text" id="setB" placeholder="مثال: a,b,c" />
-    </div>
+function parseSet(input) {
+  // حذف آکولادها، کروشه‌ها و پرانتزها
+  const cleaned = input.replace(/[{}[\]()]/g, "").trim();
 
-    <div class="buttons">
-      <button onclick="calculateUnion()">اجتماع</button>
-      <button onclick="calculateIntersection()">اشتراک</button>
-      <button onclick="calculateDifference()">تفاضل</button>
-    </div>
+  // جدا کردن اعضا بر اساس فاصله یا کاما
+  const parts = cleaned.split(/[\s,]+/).filter(x => /^[0-9a-zA-Z]+$/.test(x));
 
-    <div id="result" class="result"></div>
-    <div id="alert" class="alert"></div>
-  </div>
+  // اگر خالی بود یا مقدار نامعتبر وارد شده بود
+  if (parts.length === 0) return null;
 
-  <script src="script.js"></script>
-</body>
-</html>
+  return new Set(parts);
+}
+
+function displayResult(res) {
+  const resultDiv = document.getElementById("result");
+  resultDiv.innerHTML = ""; // پاک کردن محتوای قبلی
+
+  const msg = document.createElement("p");
+  msg.textContent = "نتیجه مخفی است. اگر خواستی جواب را ببینی، روی دکمه زیر کلیک کن.";
+  resultDiv.appendChild(msg);
+
+  const showBtn = document.createElement("button");
+  showBtn.textContent = "نمایش جواب";
+  showBtn.onclick = () => {
+    resultDiv.innerHTML = `<strong>نتیجه:</strong> { ${Array.from(res).join(", ")} }`;
+  };
+
+  resultDiv.appendChild(showBtn);
+}
+
+function showAlert(msg) {
+  const alertDiv = document.getElementById("alert");
+  alertDiv.textContent = msg;
+  setTimeout(() => { alertDiv.textContent = ""; }, 3000);
+}
+
+function calculateUnion() {
+  const setA = parseSet(document.getElementById("setA").value);
+  const setB = parseSet(document.getElementById("setB").value);
+
+  if (!setA || !setB) {
+    return showAlert("⚠️ لطفاً فقط اعداد یا حروف انگلیسی وارد کنید.");
+  }
+
+  const union = new Set([...setA, ...setB]);
+  displayResult(union);
+}
+
+function calculateIntersection() {
+  const setA = parseSet(document.getElementById("setA").value);
+  const setB = parseSet(document.getElementById("setB").value);
+
+  if (!setA || !setB) {
+    return showAlert("⚠️ لطفاً فقط اعداد یا حروف انگلیسی وارد کنید.");
+  }
+
+  const intersection = new Set([...setA].filter(x => setB.has(x)));
+  displayResult(intersection);
+}
+
+function calculateDifference() {
+  const setA = parseSet(document.getElementById("setA").value);
+  const setB = parseSet(document.getElementById("setB").value);
+
+  if (!setA || !setB) {
+    return showAlert("⚠️ لطفاً فقط اعداد یا حروف انگلیسی وارد کنید.");
+  }
+
+  const difference = new Set([...setA].filter(x => !setB.has(x)));
+  displayResult(difference);
+}
